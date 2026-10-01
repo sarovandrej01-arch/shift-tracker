@@ -1,12 +1,12 @@
 import asyncio
 from logging.config import fileConfig
-from pathlib import Path
 
 from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
+from app.core.config import settings
 from app.db.base import Base
 import app.models  # noqa: F401
 
@@ -18,29 +18,9 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 
-def database_url() -> str:
-    env_path = Path(__file__).resolve().parents[2] / ".env"
-    if not env_path.is_file():
-        raise RuntimeError(f"DATABASE_URL is not set and {env_path} was not found")
-
-    for raw_line in env_path.read_text(encoding="utf-8").splitlines():
-        line = raw_line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        key, value = line.split("=", 1)
-        if key.strip() != "DATABASE_URL":
-            continue
-        url = value.strip().strip('"').strip("'")
-        if url:
-            return url
-        break
-
-    raise RuntimeError("DATABASE_URL is empty")
-
-
 def run_migrations_offline() -> None:
     context.configure(
-        url=database_url(),
+        url=settings.database_url,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -64,7 +44,7 @@ def do_run_migrations(connection: Connection) -> None:
 
 async def run_async_migrations() -> None:
     configuration = config.get_section(config.config_ini_section, {})
-    configuration["sqlalchemy.url"] = database_url()
+    configuration["sqlalchemy.url"] = settings.database_url
     connectable = async_engine_from_config(
         configuration,
         prefix="sqlalchemy.",

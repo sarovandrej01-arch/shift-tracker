@@ -5,3 +5,4 @@ SQLAlchemy>=2,<3
 greenlet
 alembic
 asyncpg
+pydantic-settings
