@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+aiogram>=3,<4
+SQLAlchemy>=2,<3
+greenlet
+alembic
+asyncpg
