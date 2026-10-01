@@ -11,6 +11,11 @@ class MessageStatus(str, Enum):
     ERROR = "error"
 
 
+class UserRole(str, Enum):
+    ADMIN = "admin"
+    MODERATOR = "moderator"
+
+
 class MessageReason(str, Enum):
     NO_PHOTO = "no_photo"
     EMPLOYEE_NOT_FOUND = "employee_not_found"

@@ -11,6 +11,7 @@ from app.db.base import Base, TimestampMixin
 if TYPE_CHECKING:
     from app.models.employee import Employee
     from app.models.telegram_message import TelegramMessage
+    from app.models.user import User
     from app.models.work_object import WorkObject
 
 
@@ -36,7 +37,9 @@ class Shift(TimestampMixin, Base):
         server_default=false(),
         nullable=False,
     )
+    confirmed_by_user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
 
     employee: Mapped[Employee] = relationship(back_populates="shifts")
     work_object: Mapped[WorkObject] = relationship(back_populates="shifts")
     source_message: Mapped[TelegramMessage | None] = relationship(back_populates="shifts")
+    confirmed_by_user: Mapped[User | None] = relationship(back_populates="confirmed_shifts")

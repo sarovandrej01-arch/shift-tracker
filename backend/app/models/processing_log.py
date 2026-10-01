@@ -10,6 +10,7 @@ from app.db.base import Base
 
 if TYPE_CHECKING:
     from app.models.telegram_message import TelegramMessage
+    from app.models.user import User
 
 
 class ProcessingLog(Base):
@@ -17,6 +18,7 @@ class ProcessingLog(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     message_id: Mapped[int] = mapped_column(ForeignKey("telegram_messages.id"), nullable=False)
+    user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
     action: Mapped[str] = mapped_column(String, nullable=False)
     details: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(
@@ -26,3 +28,4 @@ class ProcessingLog(Base):
     )
 
     message: Mapped[TelegramMessage] = relationship(back_populates="processing_logs")
+    user: Mapped[User | None] = relationship(back_populates="processing_logs")

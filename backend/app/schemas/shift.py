@@ -12,5 +12,6 @@ class ShiftRead(BaseModel):
     shift_date: date
     source_message_id: int | None
     confirmed_manually: bool
+    confirmed_by_user_id: int | None
     created_at: datetime
     updated_at: datetime
