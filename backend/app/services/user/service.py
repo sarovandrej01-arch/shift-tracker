@@ -18,15 +18,20 @@ class UserService:
         if await self.repository.exists_by_email(email):
             raise UserAlreadyExistsError
 
-        user = await self.repository.create(
-            email=email,
-            full_name=data.full_name,
-            hashed_password=hash_password(data.password),
-            role=data.role,
-            is_active=data.is_active,
-        )
-        await self._commit()
-        return user
+        hashed_password = hash_password(data.password)
+        try:
+            user = await self.repository.create(
+                email=email,
+                full_name=data.full_name,
+                hashed_password=hashed_password,
+                role=data.role,
+                is_active=data.is_active,
+            )
+            await self.session.commit()
+            return user
+        except Exception:
+            await self.session.rollback()
+            raise
 
     async def get_user(self, user_id: int) -> User:
         user = await self.repository.get_by_id(user_id)
@@ -77,25 +82,30 @@ class UserService:
             if password is not None:
                 changes["hashed_password"] = hash_password(str(password))
 
-        user = await self.repository.update(user, changes)
-        await self._commit()
-        return user
+        try:
+            user = await self.repository.update(user, changes)
+            await self.session.commit()
+            return user
+        except Exception:
+            await self.session.rollback()
+            raise
 
     async def deactivate_user(self, user_id: int) -> User:
         user = await self.get_user(user_id)
-        user = await self.repository.update(user, {"is_active": False})
-        await self._commit()
-        return user
+        try:
+            user = await self.repository.update(user, {"is_active": False})
+            await self.session.commit()
+            return user
+        except Exception:
+            await self.session.rollback()
+            raise
 
     async def activate_user(self, user_id: int) -> User:
         user = await self.get_user(user_id)
-        user = await self.repository.update(user, {"is_active": True})
-        await self._commit()
-        return user
-
-    async def _commit(self) -> None:
         try:
+            user = await self.repository.update(user, {"is_active": True})
             await self.session.commit()
+            return user
         except Exception:
             await self.session.rollback()
             raise

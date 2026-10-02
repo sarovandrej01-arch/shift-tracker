@@ -42,16 +42,20 @@ class EmployeeService:
         ):
             raise EmployeeTelegramUserAlreadyExistsError
 
-        employee = await self.repository.create(
-            full_name=full_name,
-            personnel_number=personnel_number,
-            telegram_user_id=data.telegram_user_id,
-            telegram_username=telegram_username,
-            callsign=callsign,
-            is_active=data.is_active,
-        )
-        await self._commit()
-        return employee
+        try:
+            employee = await self.repository.create(
+                full_name=full_name,
+                personnel_number=personnel_number,
+                telegram_user_id=data.telegram_user_id,
+                telegram_username=telegram_username,
+                callsign=callsign,
+                is_active=data.is_active,
+            )
+            await self.session.commit()
+            return employee
+        except Exception:
+            await self.session.rollback()
+            raise
 
     async def get_employee(self, employee_id: int) -> Employee:
         employee = await self.repository.get_by_id(employee_id)
@@ -121,25 +125,30 @@ class EmployeeService:
             ):
                 raise EmployeeTelegramUserAlreadyExistsError
 
-        employee = await self.repository.update(employee, changes)
-        await self._commit()
-        return employee
+        try:
+            employee = await self.repository.update(employee, changes)
+            await self.session.commit()
+            return employee
+        except Exception:
+            await self.session.rollback()
+            raise
 
     async def activate_employee(self, employee_id: int) -> Employee:
         employee = await self.get_employee(employee_id)
-        employee = await self.repository.update(employee, {"is_active": True})
-        await self._commit()
-        return employee
+        try:
+            employee = await self.repository.update(employee, {"is_active": True})
+            await self.session.commit()
+            return employee
+        except Exception:
+            await self.session.rollback()
+            raise
 
     async def deactivate_employee(self, employee_id: int) -> Employee:
         employee = await self.get_employee(employee_id)
-        employee = await self.repository.update(employee, {"is_active": False})
-        await self._commit()
-        return employee
-
-    async def _commit(self) -> None:
         try:
+            employee = await self.repository.update(employee, {"is_active": False})
             await self.session.commit()
+            return employee
         except Exception:
             await self.session.rollback()
             raise
