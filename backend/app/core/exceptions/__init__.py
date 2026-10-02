@@ -9,6 +9,10 @@ from app.core.exceptions.employee import (
     EmployeePersonnelNumberAlreadyExistsError,
     EmployeeTelegramUserAlreadyExistsError,
 )
+from app.core.exceptions.telegram_message import (
+    TelegramMessageAlreadyExistsError,
+    TelegramMessageNotFoundError,
+)
 from app.core.exceptions.telegram_group import (
     TelegramGroupChatAlreadyExistsError,
     TelegramGroupNotFoundError,
@@ -27,6 +31,8 @@ __all__ = [
     "InvalidUserPasswordError",
     "PermissionDeniedError",
     "TelegramGroupChatAlreadyExistsError",
+    "TelegramMessageAlreadyExistsError",
+    "TelegramMessageNotFoundError",
     "TelegramGroupNotFoundError",
     "TelegramGroupWorkObjectNotFoundError",
     "UserAlreadyExistsError",

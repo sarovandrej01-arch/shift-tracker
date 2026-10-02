@@ -8,12 +8,14 @@ from app.db.session import get_db_session
 from app.models.user import User
 from app.repositories.employee import EmployeeRepository
 from app.repositories.telegram_group import TelegramGroupRepository
+from app.repositories.telegram_message import TelegramMessageRepository
 from app.repositories.user import UserRepository
 from app.repositories.work_object import WorkObjectRepository
 from app.services.auth.jwt import decode_access_token
 from app.services.auth.service import AuthService
 from app.services.employee import EmployeeService
 from app.services.telegram_group import TelegramGroupService
+from app.services.telegram_message import TelegramMessageService
 from app.services.user import UserService
 from app.services.work_object import WorkObjectService
 
@@ -75,6 +77,19 @@ def get_telegram_group_service(
         work_object_repository=work_object_repository,
         session=session,
     )
+
+
+def get_telegram_message_repository(
+    session: AsyncSession = Depends(get_db_session),
+) -> TelegramMessageRepository:
+    return TelegramMessageRepository(session)
+
+
+def get_telegram_message_service(
+    session: AsyncSession = Depends(get_db_session),
+    repository: TelegramMessageRepository = Depends(get_telegram_message_repository),
+) -> TelegramMessageService:
+    return TelegramMessageService(repository=repository, session=session)
 
 
 def get_auth_service(

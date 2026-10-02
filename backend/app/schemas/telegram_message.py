@@ -1,8 +1,38 @@
 from datetime import date, datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from app.core.enums import MessageReason, MessageStatus
+
+
+def _blank_to_none(value: str | None) -> str | None:
+    if value is None:
+        return None
+    normalized = value.strip()
+    return normalized or None
+
+
+class TelegramMessageCreate(BaseModel):
+    telegram_chat_id: int
+    telegram_message_id: int
+    telegram_user_id: int | None = None
+    telegram_username: str | None = None
+    text: str | None = None
+    caption: str | None = None
+    photo_file_id: str | None = None
+    telegram_created_at: datetime
+
+    @field_validator("telegram_username", "text", "caption", "photo_file_id")
+    @classmethod
+    def blank_optional_to_none(cls, value: str | None) -> str | None:
+        return _blank_to_none(value)
+
+    @field_validator("telegram_created_at")
+    @classmethod
+    def require_timezone(cls, value: datetime) -> datetime:
+        if value.tzinfo is None or value.tzinfo.utcoffset(value) is None:
+            raise ValueError("telegram_created_at must be timezone-aware")
+        return value
 
 
 class TelegramMessageRead(BaseModel):
