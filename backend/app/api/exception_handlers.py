@@ -9,6 +9,9 @@ from app.core.exceptions import (
     InvalidCredentialsError,
     InvalidTokenError,
     PermissionDeniedError,
+    TelegramGroupChatAlreadyExistsError,
+    TelegramGroupNotFoundError,
+    TelegramGroupWorkObjectNotFoundError,
     UserAlreadyExistsError,
     UserNotFoundError,
     WorkObjectAlreadyExistsError,
@@ -92,6 +95,30 @@ async def employee_telegram_user_already_exists_handler(
 async def work_object_not_found_handler(
     _request: Request,
     _exc: WorkObjectNotFoundError,
+) -> JSONResponse:
+    return JSONResponse(status_code=404, content={"detail": "Work object not found"})
+
+
+async def telegram_group_not_found_handler(
+    _request: Request,
+    _exc: TelegramGroupNotFoundError,
+) -> JSONResponse:
+    return JSONResponse(status_code=404, content={"detail": "Telegram group not found"})
+
+
+async def telegram_group_chat_already_exists_handler(
+    _request: Request,
+    _exc: TelegramGroupChatAlreadyExistsError,
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=409,
+        content={"detail": "Telegram group with this chat ID already exists"},
+    )
+
+
+async def telegram_group_work_object_not_found_handler(
+    _request: Request,
+    _exc: TelegramGroupWorkObjectNotFoundError,
 ) -> JSONResponse:
     return JSONResponse(status_code=404, content={"detail": "Work object not found"})
 

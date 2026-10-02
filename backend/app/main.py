@@ -8,6 +8,9 @@ from app.api.exception_handlers import (
     invalid_credentials_handler,
     invalid_token_handler,
     permission_denied_handler,
+    telegram_group_chat_already_exists_handler,
+    telegram_group_not_found_handler,
+    telegram_group_work_object_not_found_handler,
     user_already_exists_handler,
     user_not_found_handler,
     work_object_already_exists_handler,
@@ -22,6 +25,9 @@ from app.core.exceptions import (
     InvalidCredentialsError,
     InvalidTokenError,
     PermissionDeniedError,
+    TelegramGroupChatAlreadyExistsError,
+    TelegramGroupNotFoundError,
+    TelegramGroupWorkObjectNotFoundError,
     UserAlreadyExistsError,
     UserNotFoundError,
     WorkObjectAlreadyExistsError,
@@ -47,3 +53,12 @@ app.add_exception_handler(
 )
 app.add_exception_handler(WorkObjectNotFoundError, work_object_not_found_handler)
 app.add_exception_handler(WorkObjectAlreadyExistsError, work_object_already_exists_handler)
+app.add_exception_handler(TelegramGroupNotFoundError, telegram_group_not_found_handler)
+app.add_exception_handler(
+    TelegramGroupChatAlreadyExistsError,
+    telegram_group_chat_already_exists_handler,
+)
+app.add_exception_handler(
+    TelegramGroupWorkObjectNotFoundError,
+    telegram_group_work_object_not_found_handler,
+)

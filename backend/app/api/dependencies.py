@@ -7,11 +7,13 @@ from app.core.exceptions.auth import InactiveUserError, InvalidTokenError, Permi
 from app.db.session import get_db_session
 from app.models.user import User
 from app.repositories.employee import EmployeeRepository
+from app.repositories.telegram_group import TelegramGroupRepository
 from app.repositories.user import UserRepository
 from app.repositories.work_object import WorkObjectRepository
 from app.services.auth.jwt import decode_access_token
 from app.services.auth.service import AuthService
 from app.services.employee import EmployeeService
+from app.services.telegram_group import TelegramGroupService
 from app.services.user import UserService
 from app.services.work_object import WorkObjectService
 
@@ -55,6 +57,24 @@ def get_work_object_service(
     repository: WorkObjectRepository = Depends(get_work_object_repository),
 ) -> WorkObjectService:
     return WorkObjectService(repository=repository, session=session)
+
+
+def get_telegram_group_repository(
+    session: AsyncSession = Depends(get_db_session),
+) -> TelegramGroupRepository:
+    return TelegramGroupRepository(session)
+
+
+def get_telegram_group_service(
+    session: AsyncSession = Depends(get_db_session),
+    repository: TelegramGroupRepository = Depends(get_telegram_group_repository),
+    work_object_repository: WorkObjectRepository = Depends(get_work_object_repository),
+) -> TelegramGroupService:
+    return TelegramGroupService(
+        repository=repository,
+        work_object_repository=work_object_repository,
+        session=session,
+    )
 
 
 def get_auth_service(
