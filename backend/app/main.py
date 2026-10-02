@@ -10,6 +10,8 @@ from app.api.exception_handlers import (
     permission_denied_handler,
     user_already_exists_handler,
     user_not_found_handler,
+    work_object_already_exists_handler,
+    work_object_not_found_handler,
 )
 from app.api.router import api_router
 from app.core.exceptions import (
@@ -22,6 +24,8 @@ from app.core.exceptions import (
     PermissionDeniedError,
     UserAlreadyExistsError,
     UserNotFoundError,
+    WorkObjectAlreadyExistsError,
+    WorkObjectNotFoundError,
 )
 
 app = FastAPI(title="shift-tracker")
@@ -41,3 +45,5 @@ app.add_exception_handler(
     EmployeeTelegramUserAlreadyExistsError,
     employee_telegram_user_already_exists_handler,
 )
+app.add_exception_handler(WorkObjectNotFoundError, work_object_not_found_handler)
+app.add_exception_handler(WorkObjectAlreadyExistsError, work_object_already_exists_handler)

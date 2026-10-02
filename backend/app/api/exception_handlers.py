@@ -11,6 +11,8 @@ from app.core.exceptions import (
     PermissionDeniedError,
     UserAlreadyExistsError,
     UserNotFoundError,
+    WorkObjectAlreadyExistsError,
+    WorkObjectNotFoundError,
 )
 
 _BEARER_HEADER = {"WWW-Authenticate": "Bearer"}
@@ -84,4 +86,21 @@ async def employee_telegram_user_already_exists_handler(
     return JSONResponse(
         status_code=409,
         content={"detail": "Employee with this Telegram user ID already exists"},
+    )
+
+
+async def work_object_not_found_handler(
+    _request: Request,
+    _exc: WorkObjectNotFoundError,
+) -> JSONResponse:
+    return JSONResponse(status_code=404, content={"detail": "Work object not found"})
+
+
+async def work_object_already_exists_handler(
+    _request: Request,
+    _exc: WorkObjectAlreadyExistsError,
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=409,
+        content={"detail": "Work object with this name already exists"},
     )

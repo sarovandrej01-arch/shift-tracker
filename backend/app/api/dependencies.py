@@ -8,10 +8,12 @@ from app.db.session import get_db_session
 from app.models.user import User
 from app.repositories.employee import EmployeeRepository
 from app.repositories.user import UserRepository
+from app.repositories.work_object import WorkObjectRepository
 from app.services.auth.jwt import decode_access_token
 from app.services.auth.service import AuthService
 from app.services.employee import EmployeeService
 from app.services.user import UserService
+from app.services.work_object import WorkObjectService
 
 bearer_scheme = HTTPBearer()
 
@@ -40,6 +42,19 @@ def get_employee_service(
     repository: EmployeeRepository = Depends(get_employee_repository),
 ) -> EmployeeService:
     return EmployeeService(repository=repository, session=session)
+
+
+def get_work_object_repository(
+    session: AsyncSession = Depends(get_db_session),
+) -> WorkObjectRepository:
+    return WorkObjectRepository(session)
+
+
+def get_work_object_service(
+    session: AsyncSession = Depends(get_db_session),
+    repository: WorkObjectRepository = Depends(get_work_object_repository),
+) -> WorkObjectService:
+    return WorkObjectService(repository=repository, session=session)
 
 
 def get_auth_service(

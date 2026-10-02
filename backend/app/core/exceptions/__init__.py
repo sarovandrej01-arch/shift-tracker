@@ -10,6 +10,7 @@ from app.core.exceptions.employee import (
     EmployeeTelegramUserAlreadyExistsError,
 )
 from app.core.exceptions.user import InvalidUserPasswordError, UserAlreadyExistsError, UserNotFoundError
+from app.core.exceptions.work_object import WorkObjectAlreadyExistsError, WorkObjectNotFoundError
 
 __all__ = [
     "EmployeeNotFoundError",
@@ -22,4 +23,6 @@ __all__ = [
     "PermissionDeniedError",
     "UserAlreadyExistsError",
     "UserNotFoundError",
+    "WorkObjectAlreadyExistsError",
+    "WorkObjectNotFoundError",
 ]
