@@ -2,6 +2,9 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 
 from app.core.exceptions import (
+    EmployeeNotFoundError,
+    EmployeePersonnelNumberAlreadyExistsError,
+    EmployeeTelegramUserAlreadyExistsError,
     InactiveUserError,
     InvalidCredentialsError,
     InvalidTokenError,
@@ -55,3 +58,30 @@ async def permission_denied_handler(
     _exc: PermissionDeniedError,
 ) -> JSONResponse:
     return JSONResponse(status_code=403, content={"detail": "Permission denied"})
+
+
+async def employee_not_found_handler(
+    _request: Request,
+    _exc: EmployeeNotFoundError,
+) -> JSONResponse:
+    return JSONResponse(status_code=404, content={"detail": "Employee not found"})
+
+
+async def employee_personnel_number_already_exists_handler(
+    _request: Request,
+    _exc: EmployeePersonnelNumberAlreadyExistsError,
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=409,
+        content={"detail": "Employee with this personnel number already exists"},
+    )
+
+
+async def employee_telegram_user_already_exists_handler(
+    _request: Request,
+    _exc: EmployeeTelegramUserAlreadyExistsError,
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=409,
+        content={"detail": "Employee with this Telegram user ID already exists"},
+    )

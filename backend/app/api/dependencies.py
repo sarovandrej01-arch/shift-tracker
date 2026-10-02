@@ -6,9 +6,11 @@ from app.core.enums import UserRole
 from app.core.exceptions.auth import InactiveUserError, InvalidTokenError, PermissionDeniedError
 from app.db.session import get_db_session
 from app.models.user import User
+from app.repositories.employee import EmployeeRepository
 from app.repositories.user import UserRepository
 from app.services.auth.jwt import decode_access_token
 from app.services.auth.service import AuthService
+from app.services.employee import EmployeeService
 from app.services.user import UserService
 
 bearer_scheme = HTTPBearer()
@@ -25,6 +27,19 @@ def get_user_service(
     repository: UserRepository = Depends(get_user_repository),
 ) -> UserService:
     return UserService(repository=repository, session=session)
+
+
+def get_employee_repository(
+    session: AsyncSession = Depends(get_db_session),
+) -> EmployeeRepository:
+    return EmployeeRepository(session)
+
+
+def get_employee_service(
+    session: AsyncSession = Depends(get_db_session),
+    repository: EmployeeRepository = Depends(get_employee_repository),
+) -> EmployeeService:
+    return EmployeeService(repository=repository, session=session)
 
 
 def get_auth_service(

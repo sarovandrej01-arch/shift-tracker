@@ -4,9 +4,17 @@ from app.core.exceptions.auth import (
     InvalidTokenError,
     PermissionDeniedError,
 )
+from app.core.exceptions.employee import (
+    EmployeeNotFoundError,
+    EmployeePersonnelNumberAlreadyExistsError,
+    EmployeeTelegramUserAlreadyExistsError,
+)
 from app.core.exceptions.user import InvalidUserPasswordError, UserAlreadyExistsError, UserNotFoundError
 
 __all__ = [
+    "EmployeeNotFoundError",
+    "EmployeePersonnelNumberAlreadyExistsError",
+    "EmployeeTelegramUserAlreadyExistsError",
     "InactiveUserError",
     "InvalidCredentialsError",
     "InvalidTokenError",
