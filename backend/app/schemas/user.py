@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
 
 from app.core.enums import UserRole
 
@@ -19,6 +19,15 @@ class UserUpdate(BaseModel):
     password: str | None = Field(default=None, min_length=8)
     role: UserRole | None = None
     is_active: bool | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def reject_explicit_nulls(cls, data: object) -> object:
+        if isinstance(data, dict):
+            for field in ("email", "full_name", "password", "role", "is_active"):
+                if field in data and data[field] is None:
+                    raise ValueError(f"{field} cannot be null")
+        return data
 
 
 class UserRead(BaseModel):
