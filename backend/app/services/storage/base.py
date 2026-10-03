@@ -21,6 +21,6 @@ class ObjectStorage(ABC):
         self,
         *,
         key: str,
-        expires_seconds: int = 3600,
+        expires_seconds: int | None = None,
     ) -> str:
         ...

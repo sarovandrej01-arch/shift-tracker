@@ -7,13 +7,14 @@ from app.core.exceptions import StorageConfigurationError
 from app.services.storage import S3Storage
 
 
-def _storage(client: AsyncMock) -> tuple[S3Storage, MagicMock]:
+def _storage(client: AsyncMock, *, presigned_url_expire_seconds: int = 3600) -> tuple[S3Storage, MagicMock]:
     storage = S3Storage(
         endpoint_url="http://localhost:9000",
         access_key="access-key",
         secret_key="secret-key",
         bucket="shift-tracker",
         region="us-east-1",
+        presigned_url_expire_seconds=presigned_url_expire_seconds,
     )
     context = MagicMock()
     context.__aenter__ = AsyncMock(return_value=client)
@@ -152,6 +153,32 @@ def test_missing_config_is_rejected(kwargs: dict[str, str | None], setting_name:
 
     with pytest.raises(StorageConfigurationError, match=setting_name):
         S3Storage(**config)
+
+
+def test_constructor_expiration_is_used_by_default() -> None:
+    async def scenario() -> None:
+        client = AsyncMock()
+        client.generate_presigned_url.return_value = "https://example.test/photo"
+        storage, _context = _storage(client, presigned_url_expire_seconds=1800)
+
+        await storage.get_presigned_url(key="telegram/photo.jpg")
+
+        assert client.generate_presigned_url.await_args.kwargs["ExpiresIn"] == 1800
+
+    asyncio.run(scenario())
+
+
+@pytest.mark.parametrize("presigned_url_expire_seconds", [0, -1])
+def test_invalid_constructor_expiration_is_rejected(presigned_url_expire_seconds: int) -> None:
+    with pytest.raises(ValueError, match="presigned_url_expire_seconds"):
+        S3Storage(
+            endpoint_url="http://localhost:9000",
+            access_key="access-key",
+            secret_key="secret-key",
+            bucket="shift-tracker",
+            region="us-east-1",
+            presigned_url_expire_seconds=presigned_url_expire_seconds,
+        )
 
 
 def test_s3_exception_is_not_swallowed() -> None:

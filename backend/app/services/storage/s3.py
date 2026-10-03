@@ -32,6 +32,8 @@ class S3Storage(ObjectStorage):
         self.bucket = _require_setting(bucket, "S3_BUCKET")
         access_key = _require_setting(access_key, "S3_ACCESS_KEY")
         secret_key = _require_setting(secret_key, "S3_SECRET_KEY")
+        if presigned_url_expire_seconds <= 0:
+            raise ValueError("presigned_url_expire_seconds must be greater than 0")
         self.presigned_url_expire_seconds = presigned_url_expire_seconds
         self.session = aioboto3.Session(
             aws_access_key_id=access_key,
@@ -73,14 +75,15 @@ class S3Storage(ObjectStorage):
         self,
         *,
         key: str,
-        expires_seconds: int = 3600,
+        expires_seconds: int | None = None,
     ) -> str:
-        if expires_seconds <= 0:
+        expires = expires_seconds if expires_seconds is not None else self.presigned_url_expire_seconds
+        if expires <= 0:
             raise ValueError("expires_seconds must be greater than 0")
         normalized_key = _normalize_key(key)
         async with self._client() as client:
             return await client.generate_presigned_url(
                 "get_object",
                 Params={"Bucket": self.bucket, "Key": normalized_key},
-                ExpiresIn=expires_seconds,
+                ExpiresIn=expires,
             )
