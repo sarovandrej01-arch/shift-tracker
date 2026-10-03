@@ -25,13 +25,17 @@ export function AuthProvider() {
   const [authError, setAuthError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(() => getAccessToken() !== null);
 
-  const logout = useCallback(() => {
+  const clearSession = useCallback(() => {
     clearAccessToken();
     setUser(null);
     setAuthError(null);
     queryClient.clear();
+  }, []);
+
+  const logout = useCallback(() => {
+    clearSession();
     void navigate("/login", { replace: true });
-  }, [navigate]);
+  }, [clearSession, navigate]);
 
   const refreshUser = useCallback(async () => {
     const nextUser = await getCurrentUser();
@@ -47,13 +51,12 @@ export function AuthProvider() {
       const nextUser = await getCurrentUser();
       setUser(nextUser);
     } catch (error) {
-      clearAccessToken();
-      setUser(null);
+      clearSession();
       throw error;
     }
-  }, []);
+  }, [clearSession]);
 
-  useEffect(() => subscribeUnauthorized(() => setUser(null)), []);
+  useEffect(() => subscribeUnauthorized(clearSession), [clearSession]);
 
   useEffect(() => {
     const token = getAccessToken();
@@ -76,12 +79,14 @@ export function AuthProvider() {
           return;
         }
         const apiError = error instanceof ApiError ? error : normalizeApiError(error);
-        setUser(null);
-        if (apiError.status === 401) {
-          clearAccessToken();
-          setAuthError(null);
+        const inactiveSession = apiError.status === 403 && apiError.detail === "User is inactive";
+        if (apiError.status === 401 || inactiveSession) {
+          if (getAccessToken() === token) {
+            clearSession();
+          }
           return;
         }
+        setUser(null);
         setAuthError(sessionErrorMessage(error));
       })
       .finally(() => {
@@ -93,7 +98,7 @@ export function AuthProvider() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [clearSession]);
 
   const value = useMemo(
     () => ({

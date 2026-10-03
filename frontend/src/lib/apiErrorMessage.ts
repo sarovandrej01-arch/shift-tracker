@@ -44,10 +44,16 @@ export function getApiErrorMessage(error: unknown): string {
     if (apiError.detail?.includes("date_from")) {
       return "Дата начала не может быть позже даты окончания";
     }
+    if (apiError.detail?.toLowerCase().includes("timezone")) {
+      return "Некорректный часовой пояс";
+    }
     return "Проверьте введённые данные";
   }
   if (apiError.status === 502) {
     return "Хранилище фотографий временно недоступно";
+  }
+  if (apiError.status >= 500) {
+    return "Ошибка сервера";
   }
   if (apiError.status === 0) {
     return "Не удалось подключиться к серверу";

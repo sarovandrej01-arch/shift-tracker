@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { NavLink, Outlet } from "react-router-dom";
 
 import { canAccessAdmin, formatUserRole } from "../auth/roles.ts";
 import { useAuth } from "../hooks/useAuth.ts";
@@ -53,15 +53,8 @@ function SidebarNav({
 
 export function AppLayout() {
   const { user, logout } = useAuth();
-  const location = useLocation();
   const [navOpen, setNavOpen] = useState(false);
-  const [navPath, setNavPath] = useState(location.pathname);
   const items = NAV_ITEMS.filter((item) => !item.adminOnly || canAccessAdmin(user));
-
-  if (navPath !== location.pathname) {
-    setNavPath(location.pathname);
-    setNavOpen(false);
-  }
 
   useEffect(() => {
     if (!navOpen) {

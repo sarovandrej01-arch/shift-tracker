@@ -18,13 +18,18 @@ export function Modal({
     if (!open) {
       return;
     }
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         onClose();
       }
     }
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
   }, [onClose, open]);
 
   if (!open) {
