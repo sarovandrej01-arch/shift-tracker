@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime, time
+from datetime import datetime, time, timezone
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 from zoneinfo import ZoneInfo
@@ -7,6 +7,7 @@ from zoneinfo import ZoneInfo
 import pytest
 
 from app.core.enums import MessageReason, MessageStatus
+from app.schemas.telegram_message import TelegramMessageCreate
 from app.services.message_processing import (
     IncomingTelegramMessage,
     MessageProcessor,
@@ -29,6 +30,7 @@ def _incoming(**overrides: object) -> IncomingTelegramMessage:
         "caption": None,
         "photo_file_id": "photo-1",
         "telegram_created_at": datetime(2026, 10, 2, 20, 30, tzinfo=MOSCOW),
+        "photo_storage_key": None,
     }
     data.update(overrides)
     return IncomingTelegramMessage(**data)
@@ -137,6 +139,24 @@ def _actions(parts: SimpleNamespace) -> list[str]:
     return [call.kwargs["action"] for call in parts.logs.create.await_args_list]
 
 
+def test_message_create_schema_accepts_storage_key() -> None:
+    empty = TelegramMessageCreate(
+        telegram_chat_id=1,
+        telegram_message_id=2,
+        telegram_created_at=datetime(2026, 10, 3, tzinfo=timezone.utc),
+        photo_storage_key=None,
+    )
+    filled = TelegramMessageCreate(
+        telegram_chat_id=1,
+        telegram_message_id=2,
+        telegram_created_at=datetime(2026, 10, 3, tzinfo=timezone.utc),
+        photo_storage_key="  telegram/2026/10/03/photo.jpg  ",
+    )
+
+    assert empty.photo_storage_key is None
+    assert filled.photo_storage_key == "telegram/2026/10/03/photo.jpg"
+
+
 def test_successful_processing_commits_once() -> None:
     async def scenario() -> None:
         processor, parts = _processor()
@@ -163,10 +183,39 @@ def test_successful_processing_commits_once() -> None:
     asyncio.run(scenario())
 
 
+def test_storage_key_is_passed_to_repository() -> None:
+    async def scenario() -> None:
+        processor, parts = _processor()
+        await processor.process(
+            _incoming(
+                photo_file_id="telegram-file-id",
+                photo_storage_key="telegram/2026/10/03/photo.jpg",
+            )
+        )
+
+        parts.messages.create.assert_awaited_once()
+        assert parts.messages.create.await_args.kwargs["photo_storage_key"] == "telegram/2026/10/03/photo.jpg"
+
+    asyncio.run(scenario())
+
+
+def test_missing_storage_key_does_not_reject_photo() -> None:
+    async def scenario() -> None:
+        processor, parts = _processor()
+        result = await processor.process(
+            _incoming(photo_file_id="telegram-file-id", photo_storage_key=None)
+        )
+
+        assert result.status is MessageStatus.ACCEPTED
+        assert parts.messages.create.await_args.kwargs["photo_storage_key"] is None
+
+    asyncio.run(scenario())
+
+
 def test_no_photo_rejects_before_matching() -> None:
     async def scenario() -> None:
         processor, parts = _processor()
-        result = await processor.process(_incoming(photo_file_id=None))
+        result = await processor.process(_incoming(photo_file_id=None, photo_storage_key=None))
 
         assert result.status is MessageStatus.REJECTED
         assert result.reason is MessageReason.NO_PHOTO

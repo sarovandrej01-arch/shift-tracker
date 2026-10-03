@@ -20,9 +20,10 @@ class TelegramMessageCreate(BaseModel):
     text: str | None = None
     caption: str | None = None
     photo_file_id: str | None = None
+    photo_storage_key: str | None = None
     telegram_created_at: datetime
 
-    @field_validator("telegram_username", "text", "caption", "photo_file_id")
+    @field_validator("telegram_username", "text", "caption", "photo_file_id", "photo_storage_key")
     @classmethod
     def blank_optional_to_none(cls, value: str | None) -> str | None:
         return _blank_to_none(value)
@@ -46,6 +47,7 @@ class TelegramMessageRead(BaseModel):
     text: str | None
     caption: str | None
     photo_file_id: str | None
+    photo_storage_key: str | None
     telegram_created_at: datetime
     edited_at: datetime | None
     employee_id: int | None

@@ -6,6 +6,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.enums import MessageReason, MessageStatus
 from app.models.telegram_message import TelegramMessage
 
+def _blank_to_none(value: str | None) -> str | None:
+    if value is None:
+        return None
+    normalized = value.strip()
+    return normalized or None
+
+
 _UPDATABLE_FIELDS = frozenset(
     {
         "status",
@@ -81,6 +88,7 @@ class TelegramMessageRepository:
         caption: str | None,
         photo_file_id: str | None,
         telegram_created_at: datetime,
+        photo_storage_key: str | None = None,
         status: MessageStatus = MessageStatus.NEW,
     ) -> TelegramMessage:
         message = TelegramMessage(
@@ -91,6 +99,7 @@ class TelegramMessageRepository:
             text=text,
             caption=caption,
             photo_file_id=photo_file_id,
+            photo_storage_key=_blank_to_none(photo_storage_key),
             telegram_created_at=telegram_created_at,
             status=status,
         )

@@ -47,6 +47,7 @@ class TelegramMessage(TimestampMixin, Base):
     text: Mapped[str | None] = mapped_column(Text)
     caption: Mapped[str | None] = mapped_column(Text)
     photo_file_id: Mapped[str | None] = mapped_column(String)
+    photo_storage_key: Mapped[str | None] = mapped_column(String)
     telegram_created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     edited_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     employee_id: Mapped[int | None] = mapped_column(ForeignKey("employees.id"))

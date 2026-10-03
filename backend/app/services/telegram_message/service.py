@@ -39,6 +39,7 @@ class TelegramMessageService:
                 text=_optional_text(data.text),
                 caption=_optional_text(data.caption),
                 photo_file_id=_optional_text(data.photo_file_id),
+                photo_storage_key=_optional_text(data.photo_storage_key),
                 telegram_created_at=data.telegram_created_at,
                 status=MessageStatus.NEW,
             )

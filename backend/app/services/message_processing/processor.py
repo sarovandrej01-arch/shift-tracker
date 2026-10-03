@@ -25,6 +25,7 @@ class IncomingTelegramMessage:
     caption: str | None
     photo_file_id: str | None
     telegram_created_at: datetime
+    photo_storage_key: str | None = None
 
 
 @dataclass(slots=True)
@@ -87,6 +88,7 @@ class MessageProcessor:
             text=data.text,
             caption=data.caption,
             photo_file_id=data.photo_file_id,
+            photo_storage_key=data.photo_storage_key,
             telegram_created_at=data.telegram_created_at,
             status=MessageStatus.PROCESSING,
         )
