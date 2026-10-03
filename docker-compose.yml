@@ -1,5 +1,5 @@
-# Official minio/minio and minio/mc images are no longer published.
-# pgsty images are a drop-in community build of the same server and client.
+# Upstream MinIO container repositories are archived and no longer actively updated.
+# Use maintained PGSTY SILO-compatible images for local development.
 services:
   postgres:
     image: postgres:16
@@ -19,7 +19,7 @@ services:
       retries: 10
 
   minio:
-    image: pgsty/minio:RELEASE.2026-06-18T00-00-00Z
+    image: pgsty/silo:RELEASE.2026-09-16T00-00-00Z
     restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
@@ -38,7 +38,7 @@ services:
       start_period: 10s
 
   minio-init:
-    image: pgsty/mc:RELEASE.2026-04-17T00-00-00Z
+    image: pgsty/mc:RELEASE.2026-09-16T00-00-00Z
     depends_on:
       minio:
         condition: service_healthy
