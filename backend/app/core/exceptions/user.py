@@ -8,3 +8,11 @@ class UserAlreadyExistsError(Exception):
 
 class InvalidUserPasswordError(Exception):
     pass
+
+
+class CannotModifyOwnAdminAccessError(Exception):
+    pass
+
+
+class LastActiveAdminError(Exception):
+    pass

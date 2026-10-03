@@ -1,7 +1,12 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.enums import UserRole
-from app.core.exceptions.user import UserAlreadyExistsError, UserNotFoundError
+from app.core.exceptions.user import (
+    CannotModifyOwnAdminAccessError,
+    LastActiveAdminError,
+    UserAlreadyExistsError,
+    UserNotFoundError,
+)
 from app.models.user import User
 from app.repositories.user.repository import UserRepository
 from app.schemas.user import UserCreate, UserUpdate
@@ -62,7 +67,7 @@ class UserService:
             role=role,
         )
 
-    async def update_user(self, user_id: int, data: UserUpdate) -> User:
+    async def update_user(self, user_id: int, data: UserUpdate, *, actor_id: int) -> User:
         user = await self.repository.get_by_id(user_id)
         if user is None:
             raise UserNotFoundError
@@ -82,6 +87,13 @@ class UserService:
             if password is not None:
                 changes["hashed_password"] = hash_password(str(password))
 
+        await self._guard_admin_access(
+            user,
+            actor_id=actor_id,
+            next_role=changes.get("role") if "role" in changes else None,
+            next_is_active=changes.get("is_active") if "is_active" in changes else None,
+        )
+
         try:
             user = await self.repository.update(user, changes)
             await self.session.commit()
@@ -90,8 +102,9 @@ class UserService:
             await self.session.rollback()
             raise
 
-    async def deactivate_user(self, user_id: int) -> User:
+    async def deactivate_user(self, user_id: int, *, actor_id: int) -> User:
         user = await self.get_user(user_id)
+        await self._guard_admin_access(user, actor_id=actor_id, next_is_active=False)
         try:
             user = await self.repository.update(user, {"is_active": False})
             await self.session.commit()
@@ -109,3 +122,23 @@ class UserService:
         except Exception:
             await self.session.rollback()
             raise
+
+    async def _guard_admin_access(
+        self,
+        user: User,
+        *,
+        actor_id: int,
+        next_role: UserRole | None = None,
+        next_is_active: bool | None = None,
+    ) -> None:
+        loses_active_admin = (
+            user.role == UserRole.ADMIN
+            and user.is_active
+            and ((next_role is not None and next_role != UserRole.ADMIN) or next_is_active is False)
+        )
+        if not loses_active_admin:
+            return
+        if user.id == actor_id:
+            raise CannotModifyOwnAdminAccessError
+        if await self.repository.count_active_admins() <= 1:
+            raise LastActiveAdminError

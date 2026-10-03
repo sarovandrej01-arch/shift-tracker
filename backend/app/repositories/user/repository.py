@@ -29,6 +29,18 @@ class UserRepository:
             stmt = stmt.where(User.id != exclude_user_id)
         return await self.session.scalar(stmt) is not None
 
+    async def count_admins(self) -> int:
+        stmt = select(func.count()).select_from(User).where(User.role == UserRole.ADMIN)
+        return int(await self.session.scalar(stmt) or 0)
+
+    async def count_active_admins(self) -> int:
+        stmt = (
+            select(func.count())
+            .select_from(User)
+            .where(User.role == UserRole.ADMIN, User.is_active.is_(True))
+        )
+        return int(await self.session.scalar(stmt) or 0)
+
     async def list(
         self,
         *,

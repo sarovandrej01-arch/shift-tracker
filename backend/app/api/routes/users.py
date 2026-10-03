@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Query, status
 
-from app.api.dependencies import get_user_service
+from app.api.dependencies import get_user_service, require_admin
 from app.core.enums import UserRole
 from app.models.user import User
 from app.schemas.user import UserCreate, UserRead, UserUpdate
@@ -12,6 +12,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 @router.post("", response_model=UserRead, status_code=status.HTTP_201_CREATED)
 async def create_user(
     data: UserCreate,
+    _: User = Depends(require_admin),
     service: UserService = Depends(get_user_service),
 ) -> User:
     return await service.create_user(data)
@@ -23,6 +24,7 @@ async def list_users(
     limit: int = Query(default=100, ge=1, le=100),
     is_active: bool | None = Query(default=None),
     role: UserRole | None = Query(default=None),
+    _: User = Depends(require_admin),
     service: UserService = Depends(get_user_service),
 ) -> list[User]:
     return await service.list_users(
@@ -36,6 +38,7 @@ async def list_users(
 @router.get("/{user_id}", response_model=UserRead)
 async def get_user(
     user_id: int,
+    _: User = Depends(require_admin),
     service: UserService = Depends(get_user_service),
 ) -> User:
     return await service.get_user(user_id)
@@ -45,14 +48,16 @@ async def get_user(
 async def update_user(
     user_id: int,
     data: UserUpdate,
+    current_user: User = Depends(require_admin),
     service: UserService = Depends(get_user_service),
 ) -> User:
-    return await service.update_user(user_id, data)
+    return await service.update_user(user_id, data, actor_id=current_user.id)
 
 
 @router.post("/{user_id}/activate", response_model=UserRead)
 async def activate_user(
     user_id: int,
+    _: User = Depends(require_admin),
     service: UserService = Depends(get_user_service),
 ) -> User:
     return await service.activate_user(user_id)
@@ -61,6 +66,7 @@ async def activate_user(
 @router.post("/{user_id}/deactivate", response_model=UserRead)
 async def deactivate_user(
     user_id: int,
+    current_user: User = Depends(require_admin),
     service: UserService = Depends(get_user_service),
 ) -> User:
-    return await service.deactivate_user(user_id)
+    return await service.deactivate_user(user_id, actor_id=current_user.id)

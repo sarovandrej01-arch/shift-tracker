@@ -15,3 +15,13 @@ MinIO Console: `localhost:9001`
 `docker compose down` keeps the named volumes. `docker compose down -v` deletes PostgreSQL and MinIO data.
 
 When the backend runs on the host, use `S3_ENDPOINT_URL=http://localhost:9000`. If the backend later runs inside Compose, that URL must point at the `minio` service. A presigned URL built from the internal hostname will not open in a browser; a separate public endpoint can be added later.
+
+## First administrator
+
+Create the first admin from the machine that can reach the database. The command asks for email, name, and password in the terminal and does not expose a public registration endpoint.
+
+```bash
+cd backend
+python -m app.scripts.create_admin
+```
+

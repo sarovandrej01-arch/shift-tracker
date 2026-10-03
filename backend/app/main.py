@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.exception_handlers import (
+    cannot_modify_own_admin_access_handler,
     employee_not_found_handler,
     employee_personnel_number_already_exists_handler,
     employee_telegram_user_already_exists_handler,
@@ -9,6 +10,7 @@ from app.api.exception_handlers import (
     invalid_credentials_handler,
     invalid_date_range_handler,
     invalid_token_handler,
+    last_active_admin_handler,
     missing_token_handler,
     permission_denied_handler,
     review_confirmation_incomplete_handler,
@@ -28,6 +30,7 @@ from app.api.exception_handlers import (
 )
 from app.api.router import api_router
 from app.core.exceptions import (
+    CannotModifyOwnAdminAccessError,
     EmployeeNotFoundError,
     EmployeePersonnelNumberAlreadyExistsError,
     EmployeeTelegramUserAlreadyExistsError,
@@ -35,6 +38,7 @@ from app.core.exceptions import (
     InvalidCredentialsError,
     InvalidDateRangeError,
     InvalidTokenError,
+    LastActiveAdminError,
     MissingTokenError,
     PermissionDeniedError,
     ReviewConfirmationIncompleteError,
@@ -67,6 +71,8 @@ app.add_middleware(
 app.include_router(api_router)
 app.add_exception_handler(UserNotFoundError, user_not_found_handler)
 app.add_exception_handler(UserAlreadyExistsError, user_already_exists_handler)
+app.add_exception_handler(CannotModifyOwnAdminAccessError, cannot_modify_own_admin_access_handler)
+app.add_exception_handler(LastActiveAdminError, last_active_admin_handler)
 app.add_exception_handler(InvalidCredentialsError, invalid_credentials_handler)
 app.add_exception_handler(InvalidTokenError, invalid_token_handler)
 app.add_exception_handler(MissingTokenError, missing_token_handler)

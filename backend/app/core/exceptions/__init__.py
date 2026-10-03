@@ -26,10 +26,17 @@ from app.core.exceptions.telegram_group import (
     TelegramGroupNotFoundError,
     TelegramGroupWorkObjectNotFoundError,
 )
-from app.core.exceptions.user import InvalidUserPasswordError, UserAlreadyExistsError, UserNotFoundError
+from app.core.exceptions.user import (
+    CannotModifyOwnAdminAccessError,
+    InvalidUserPasswordError,
+    LastActiveAdminError,
+    UserAlreadyExistsError,
+    UserNotFoundError,
+)
 from app.core.exceptions.work_object import WorkObjectAlreadyExistsError, WorkObjectNotFoundError
 
 __all__ = [
+    "CannotModifyOwnAdminAccessError",
     "EmployeeNotFoundError",
     "EmployeePersonnelNumberAlreadyExistsError",
     "EmployeeTelegramUserAlreadyExistsError",
@@ -39,6 +46,7 @@ __all__ = [
     "InvalidTokenError",
     "MissingTokenError",
     "InvalidUserPasswordError",
+    "LastActiveAdminError",
     "PermissionDeniedError",
     "ProcessingLogNotFoundError",
     "ReviewConfirmationIncompleteError",

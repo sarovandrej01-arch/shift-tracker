@@ -21,6 +21,8 @@ from app.core.exceptions import (
     TelegramMessageNotFoundError,
     TelegramMessageNotInReviewError,
     TelegramMessagePhotoNotFoundError,
+    CannotModifyOwnAdminAccessError,
+    LastActiveAdminError,
     UserAlreadyExistsError,
     UserNotFoundError,
     WorkObjectAlreadyExistsError,
@@ -41,6 +43,26 @@ async def user_already_exists_handler(
     return JSONResponse(
         status_code=409,
         content={"detail": "User with this email already exists"},
+    )
+
+
+async def cannot_modify_own_admin_access_handler(
+    _request: Request,
+    _exc: CannotModifyOwnAdminAccessError,
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=409,
+        content={"detail": "You cannot remove your own administrator access"},
+    )
+
+
+async def last_active_admin_handler(
+    _request: Request,
+    _exc: LastActiveAdminError,
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=409,
+        content={"detail": "Cannot remove the last active administrator"},
     )
 
 
