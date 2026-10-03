@@ -7,6 +7,7 @@ import pytest
 
 from app.core.enums import MessageReason, MessageStatus
 from app.core.exceptions import StorageError, TelegramMessageNotFoundError, TelegramMessagePhotoNotFoundError
+from app.core.exceptions.query import InvalidDateRangeError
 from app.services.message import MessageService
 
 
@@ -99,7 +100,7 @@ def test_list_messages_rejects_inverted_date_range() -> None:
     async def scenario() -> None:
         service, parts = _service()
 
-        with pytest.raises(ValueError, match="date_from"):
+        with pytest.raises(InvalidDateRangeError, match="date_from"):
             await service.list_messages(date_from=date(2026, 10, 4), date_to=date(2026, 10, 1))
 
         parts.messages.list.assert_not_awaited()

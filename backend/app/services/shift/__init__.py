@@ -1,3 +1,3 @@
-from app.services.shift.service import ShiftService
+from app.services.shift.service import ShiftDetail, ShiftService
 
-__all__ = ["ShiftService"]
+__all__ = ["ShiftDetail", "ShiftService"]

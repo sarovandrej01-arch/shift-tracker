@@ -1,8 +1,9 @@
-from datetime import date, datetime, time, timedelta, timezone
+from datetime import date, datetime
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.dates import utc_day_end_exclusive, utc_day_start
 from app.core.enums import MessageReason, MessageStatus
 from app.models.telegram_message import TelegramMessage
 
@@ -11,14 +12,6 @@ def _blank_to_none(value: str | None) -> str | None:
         return None
     normalized = value.strip()
     return normalized or None
-
-
-def _created_at_lower(value: date) -> datetime:
-    return datetime.combine(value, time.min, tzinfo=timezone.utc)
-
-
-def _created_at_upper(value: date) -> datetime:
-    return datetime.combine(value + timedelta(days=1), time.min, tzinfo=timezone.utc)
 
 
 _UPDATABLE_FIELDS = frozenset(
@@ -92,9 +85,9 @@ class TelegramMessageRepository:
         if telegram_user_id is not None:
             stmt = stmt.where(TelegramMessage.telegram_user_id == telegram_user_id)
         if date_from is not None:
-            stmt = stmt.where(TelegramMessage.created_at >= _created_at_lower(date_from))
+            stmt = stmt.where(TelegramMessage.created_at >= utc_day_start(date_from))
         if date_to is not None:
-            stmt = stmt.where(TelegramMessage.created_at < _created_at_upper(date_to))
+            stmt = stmt.where(TelegramMessage.created_at < utc_day_end_exclusive(date_to))
         if shift_date_from is not None:
             stmt = stmt.where(TelegramMessage.shift_date >= shift_date_from)
         if shift_date_to is not None:

@@ -13,6 +13,7 @@ from app.core.exceptions.telegram_message import (
     TelegramMessageNotInReviewError,
 )
 from app.core.exceptions.work_object import WorkObjectNotFoundError
+from app.core.query_validation import ensure_date_order
 from app.models.shift import Shift
 from app.models.telegram_message import TelegramMessage
 from app.repositories.employee.repository import EmployeeRepository
@@ -32,11 +33,6 @@ class ReviewConfirmation:
 def _validate_pagination(offset: int, limit: int) -> None:
     if offset < 0 or not 1 <= limit <= 100:
         raise ValueError("offset must be >= 0 and limit must be between 1 and 100")
-
-
-def _validate_date_range(date_from: date | None, date_to: date | None) -> None:
-    if date_from is not None and date_to is not None and date_from > date_to:
-        raise ValueError("date_from must be less than or equal to date_to")
 
 
 class ReviewService:
@@ -69,7 +65,7 @@ class ReviewService:
         date_to: date | None = None,
     ) -> list[TelegramMessage]:
         _validate_pagination(offset, limit)
-        _validate_date_range(date_from, date_to)
+        ensure_date_order(date_from, date_to)
         return await self.message_repository.list(
             offset=offset,
             limit=limit,

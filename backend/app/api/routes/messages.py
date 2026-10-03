@@ -2,15 +2,18 @@ from datetime import date
 
 from fastapi import APIRouter, Depends, Query
 
-from app.api.dependencies import get_message_service, require_moderator_or_admin
+from app.api.dependencies import get_message_service, get_processing_log_service, require_moderator_or_admin
 from app.core.enums import MessageReason, MessageStatus
+from app.models.processing_log import ProcessingLog
 from app.models.telegram_message import TelegramMessage
 from app.models.user import User
 from app.schemas.employee import EmployeeRead
+from app.schemas.processing_log import ProcessingLogRead
 from app.schemas.shift import ShiftRead
 from app.schemas.telegram_message import MessageDetailRead, MessagePhotoUrlRead, TelegramMessageRead
 from app.schemas.work_object import WorkObjectRead
 from app.services.message import MessageDetail, MessageService
+from app.services.processing_log import ProcessingLogService
 
 router = APIRouter(prefix="/messages", tags=["messages"])
 
@@ -75,6 +78,15 @@ async def get_message_photo_url(
         url=photo.url,
         expires_in=photo.expires_in,
     )
+
+
+@router.get("/{message_id}/logs", response_model=list[ProcessingLogRead])
+async def list_message_logs(
+    message_id: int,
+    _: User = Depends(require_moderator_or_admin),
+    service: ProcessingLogService = Depends(get_processing_log_service),
+) -> list[ProcessingLog]:
+    return await service.list_message_logs(message_id)
 
 
 @router.get("/{message_id}", response_model=MessageDetailRead)

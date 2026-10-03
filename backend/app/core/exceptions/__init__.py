@@ -2,6 +2,7 @@ from app.core.exceptions.auth import (
     InactiveUserError,
     InvalidCredentialsError,
     InvalidTokenError,
+    MissingTokenError,
     PermissionDeniedError,
 )
 from app.core.exceptions.employee import (
@@ -10,6 +11,7 @@ from app.core.exceptions.employee import (
     EmployeeTelegramUserAlreadyExistsError,
 )
 from app.core.exceptions.processing_log import ProcessingLogNotFoundError
+from app.core.exceptions.query import InvalidDateRangeError
 from app.core.exceptions.review import ReviewConfirmationIncompleteError
 from app.core.exceptions.shift import ShiftAlreadyExistsError, ShiftNotFoundError
 from app.core.exceptions.storage import StorageConfigurationError, StorageError
@@ -33,7 +35,9 @@ __all__ = [
     "EmployeeTelegramUserAlreadyExistsError",
     "InactiveUserError",
     "InvalidCredentialsError",
+    "InvalidDateRangeError",
     "InvalidTokenError",
+    "MissingTokenError",
     "InvalidUserPasswordError",
     "PermissionDeniedError",
     "ProcessingLogNotFoundError",

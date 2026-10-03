@@ -6,6 +6,10 @@ class InvalidTokenError(Exception):
     pass
 
 
+class MissingTokenError(Exception):
+    pass
+
+
 class InactiveUserError(Exception):
     pass
 

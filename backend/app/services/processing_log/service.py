@@ -3,8 +3,11 @@ from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions.processing_log import ProcessingLogNotFoundError
+from app.core.exceptions.telegram_message import TelegramMessageNotFoundError
+from app.core.query_validation import ensure_aware_datetime, ensure_date_order
 from app.models.processing_log import ProcessingLog
 from app.repositories.processing_log.repository import ProcessingLogRepository
+from app.repositories.telegram_message.repository import TelegramMessageRepository
 
 
 def _optional_details(details: str | None) -> str | None:
@@ -15,9 +18,15 @@ def _optional_details(details: str | None) -> str | None:
 
 
 class ProcessingLogService:
-    def __init__(self, repository: ProcessingLogRepository, session: AsyncSession) -> None:
+    def __init__(
+        self,
+        repository: ProcessingLogRepository,
+        session: AsyncSession,
+        message_repository: TelegramMessageRepository | None = None,
+    ) -> None:
         self.repository = repository
         self.session = session
+        self.message_repository = message_repository
 
     async def create_log(
         self,
@@ -63,8 +72,9 @@ class ProcessingLogService:
     ) -> list[ProcessingLog]:
         if offset < 0 or not 1 <= limit <= 100:
             raise ValueError("offset must be >= 0 and limit must be between 1 and 100")
-        if date_from is not None and date_to is not None and date_from > date_to:
-            raise ValueError("date_from must be less than or equal to date_to")
+        ensure_aware_datetime(date_from, "date_from")
+        ensure_aware_datetime(date_to, "date_to")
+        ensure_date_order(date_from, date_to)
         return await self.repository.list(
             offset=offset,
             limit=limit,
@@ -74,6 +84,14 @@ class ProcessingLogService:
             date_from=date_from,
             date_to=date_to,
         )
+
+    async def list_message_logs(self, message_id: int) -> list[ProcessingLog]:
+        if self.message_repository is None:
+            raise RuntimeError("message repository is not configured")
+        message = await self.message_repository.get_by_id(message_id)
+        if message is None:
+            raise TelegramMessageNotFoundError
+        return await self.repository.list_by_message(message_id)
 
     async def list_by_message(self, message_id: int) -> list[ProcessingLog]:
         return await self.repository.list_by_message(message_id)

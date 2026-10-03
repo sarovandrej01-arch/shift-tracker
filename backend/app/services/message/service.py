@@ -6,6 +6,7 @@ from app.core.exceptions.telegram_message import (
     TelegramMessageNotFoundError,
     TelegramMessagePhotoNotFoundError,
 )
+from app.core.query_validation import ensure_date_order
 from app.models.employee import Employee
 from app.models.shift import Shift
 from app.models.telegram_message import TelegramMessage
@@ -35,16 +36,6 @@ class MessagePhotoUrl:
 def _validate_pagination(offset: int, limit: int) -> None:
     if offset < 0 or not 1 <= limit <= 100:
         raise ValueError("offset must be >= 0 and limit must be between 1 and 100")
-
-
-def _validate_date_range(
-    date_from: date | None,
-    date_to: date | None,
-    *,
-    label: str,
-) -> None:
-    if date_from is not None and date_to is not None and date_from > date_to:
-        raise ValueError(f"{label}_from must be less than or equal to {label}_to")
 
 
 class MessageService:
@@ -82,8 +73,8 @@ class MessageService:
         shift_date_to: date | None = None,
     ) -> list[TelegramMessage]:
         _validate_pagination(offset, limit)
-        _validate_date_range(date_from, date_to, label="date")
-        _validate_date_range(shift_date_from, shift_date_to, label="shift_date")
+        ensure_date_order(date_from, date_to, start_name="date_from", end_name="date_to")
+        ensure_date_order(shift_date_from, shift_date_to, start_name="shift_date_from", end_name="shift_date_to")
         return await self.message_repository.list(
             offset=offset,
             limit=limit,

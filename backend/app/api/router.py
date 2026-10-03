@@ -1,9 +1,12 @@
 from fastapi import APIRouter
 
 from app.api.routes.auth import router as auth_router
+from app.api.routes.dashboard import router as dashboard_router
 from app.api.routes.employees import router as employees_router
+from app.api.routes.logs import router as logs_router
 from app.api.routes.messages import router as messages_router
 from app.api.routes.reviews import router as reviews_router
+from app.api.routes.shifts import router as shifts_router
 from app.api.routes.telegram_groups import router as telegram_groups_router
 from app.api.routes.test import router as test_router
 from app.api.routes.users import router as users_router
@@ -18,3 +21,6 @@ api_router.include_router(work_objects_router, prefix="/v1")
 api_router.include_router(telegram_groups_router, prefix="/v1")
 api_router.include_router(reviews_router, prefix="/v1")
 api_router.include_router(messages_router, prefix="/v1")
+api_router.include_router(shifts_router, prefix="/v1")
+api_router.include_router(logs_router, prefix="/v1")
+api_router.include_router(dashboard_router, prefix="/v1")

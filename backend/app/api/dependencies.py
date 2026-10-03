@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.core.enums import UserRole
-from app.core.exceptions.auth import InactiveUserError, InvalidTokenError, PermissionDeniedError
+from app.core.exceptions.auth import InactiveUserError, InvalidTokenError, MissingTokenError, PermissionDeniedError
 from app.db.session import get_db_session
 from app.models.user import User
 from app.repositories.employee import EmployeeRepository
@@ -16,11 +16,13 @@ from app.repositories.telegram_group import TelegramGroupRepository
 from app.repositories.telegram_message import TelegramMessageRepository
 from app.repositories.user import UserRepository
 from app.repositories.work_object import WorkObjectRepository
-from app.services.auth.jwt import decode_access_token
+from app.repositories.dashboard import DashboardRepository
+from app.services.dashboard import DashboardService
 from app.services.message import MessageService
 from app.services.processing_log import ProcessingLogService
 from app.services.review import ReviewService
 from app.services.shift import ShiftService
+from app.services.auth.jwt import decode_access_token
 from app.services.auth.service import AuthService
 from app.services.employee import EmployeeService
 from app.services.storage import ObjectStorage, S3Storage
@@ -29,7 +31,7 @@ from app.services.telegram_message import TelegramMessageService
 from app.services.user import UserService
 from app.services.work_object import WorkObjectService
 
-bearer_scheme = HTTPBearer()
+bearer_scheme = HTTPBearer(auto_error=False)
 
 
 def get_user_repository(
@@ -111,8 +113,19 @@ def get_shift_repository(
 def get_shift_service(
     session: AsyncSession = Depends(get_db_session),
     repository: ShiftRepository = Depends(get_shift_repository),
+    employee_repository: EmployeeRepository = Depends(get_employee_repository),
+    work_object_repository: WorkObjectRepository = Depends(get_work_object_repository),
+    message_repository: TelegramMessageRepository = Depends(get_telegram_message_repository),
+    user_repository: UserRepository = Depends(get_user_repository),
 ) -> ShiftService:
-    return ShiftService(repository=repository, session=session)
+    return ShiftService(
+        repository=repository,
+        session=session,
+        employee_repository=employee_repository,
+        work_object_repository=work_object_repository,
+        message_repository=message_repository,
+        user_repository=user_repository,
+    )
 
 
 def get_processing_log_repository(
@@ -124,8 +137,13 @@ def get_processing_log_repository(
 def get_processing_log_service(
     session: AsyncSession = Depends(get_db_session),
     repository: ProcessingLogRepository = Depends(get_processing_log_repository),
+    message_repository: TelegramMessageRepository = Depends(get_telegram_message_repository),
 ) -> ProcessingLogService:
-    return ProcessingLogService(repository=repository, session=session)
+    return ProcessingLogService(
+        repository=repository,
+        session=session,
+        message_repository=message_repository,
+    )
 
 
 @lru_cache
@@ -176,6 +194,18 @@ def get_message_service(
     )
 
 
+def get_dashboard_repository(
+    session: AsyncSession = Depends(get_db_session),
+) -> DashboardRepository:
+    return DashboardRepository(session)
+
+
+def get_dashboard_service(
+    repository: DashboardRepository = Depends(get_dashboard_repository),
+) -> DashboardService:
+    return DashboardService(repository=repository)
+
+
 def get_auth_service(
     repository: UserRepository = Depends(get_user_repository),
 ) -> AuthService:
@@ -183,9 +213,11 @@ def get_auth_service(
 
 
 async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
     repository: UserRepository = Depends(get_user_repository),
 ) -> User:
+    if credentials is None or not credentials.credentials:
+        raise MissingTokenError
     user_id = decode_access_token(credentials.credentials)
     user = await repository.get_by_id(user_id)
     if user is None:

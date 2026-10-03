@@ -6,10 +6,13 @@ from app.api.exception_handlers import (
     employee_telegram_user_already_exists_handler,
     inactive_user_handler,
     invalid_credentials_handler,
+    invalid_date_range_handler,
     invalid_token_handler,
+    missing_token_handler,
     permission_denied_handler,
     review_confirmation_incomplete_handler,
     shift_already_exists_handler,
+    shift_not_found_handler,
     storage_error_handler,
     telegram_group_chat_already_exists_handler,
     telegram_group_not_found_handler,
@@ -29,10 +32,13 @@ from app.core.exceptions import (
     EmployeeTelegramUserAlreadyExistsError,
     InactiveUserError,
     InvalidCredentialsError,
+    InvalidDateRangeError,
     InvalidTokenError,
+    MissingTokenError,
     PermissionDeniedError,
     ReviewConfirmationIncompleteError,
     ShiftAlreadyExistsError,
+    ShiftNotFoundError,
     StorageError,
     TelegramGroupChatAlreadyExistsError,
     TelegramGroupNotFoundError,
@@ -52,6 +58,7 @@ app.add_exception_handler(UserNotFoundError, user_not_found_handler)
 app.add_exception_handler(UserAlreadyExistsError, user_already_exists_handler)
 app.add_exception_handler(InvalidCredentialsError, invalid_credentials_handler)
 app.add_exception_handler(InvalidTokenError, invalid_token_handler)
+app.add_exception_handler(MissingTokenError, missing_token_handler)
 app.add_exception_handler(InactiveUserError, inactive_user_handler)
 app.add_exception_handler(PermissionDeniedError, permission_denied_handler)
 app.add_exception_handler(EmployeeNotFoundError, employee_not_found_handler)
@@ -79,4 +86,6 @@ app.add_exception_handler(TelegramMessagePhotoNotFoundError, telegram_message_ph
 app.add_exception_handler(TelegramMessageNotInReviewError, telegram_message_not_in_review_handler)
 app.add_exception_handler(ReviewConfirmationIncompleteError, review_confirmation_incomplete_handler)
 app.add_exception_handler(ShiftAlreadyExistsError, shift_already_exists_handler)
+app.add_exception_handler(ShiftNotFoundError, shift_not_found_handler)
+app.add_exception_handler(InvalidDateRangeError, invalid_date_range_handler)
 app.add_exception_handler(StorageError, storage_error_handler)

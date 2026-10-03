@@ -7,10 +7,13 @@ from app.core.exceptions import (
     EmployeeTelegramUserAlreadyExistsError,
     InactiveUserError,
     InvalidCredentialsError,
+    InvalidDateRangeError,
     InvalidTokenError,
+    MissingTokenError,
     PermissionDeniedError,
     ReviewConfirmationIncompleteError,
     ShiftAlreadyExistsError,
+    ShiftNotFoundError,
     StorageError,
     TelegramGroupChatAlreadyExistsError,
     TelegramGroupNotFoundError,
@@ -56,6 +59,14 @@ async def invalid_token_handler(_request: Request, _exc: InvalidTokenError) -> J
     return JSONResponse(
         status_code=401,
         content={"detail": "Invalid or expired token"},
+        headers=_BEARER_HEADER,
+    )
+
+
+async def missing_token_handler(_request: Request, _exc: MissingTokenError) -> JSONResponse:
+    return JSONResponse(
+        status_code=401,
+        content={"detail": "Not authenticated"},
         headers=_BEARER_HEADER,
     )
 
@@ -179,6 +190,17 @@ async def shift_already_exists_handler(
     _exc: ShiftAlreadyExistsError,
 ) -> JSONResponse:
     return JSONResponse(status_code=409, content={"detail": "Shift already exists"})
+
+
+async def shift_not_found_handler(_request: Request, _exc: ShiftNotFoundError) -> JSONResponse:
+    return JSONResponse(status_code=404, content={"detail": "Shift not found"})
+
+
+async def invalid_date_range_handler(
+    _request: Request,
+    exc: InvalidDateRangeError,
+) -> JSONResponse:
+    return JSONResponse(status_code=422, content={"detail": exc.detail})
 
 
 async def storage_error_handler(_request: Request, _exc: StorageError) -> JSONResponse:
