@@ -21,11 +21,14 @@ class Settings(BaseSettings):
     jwt_access_token_expire_minutes: int = 60
 
     s3_endpoint_url: str | None = None
+    s3_public_endpoint_url: str | None = None
     s3_access_key: str | None = None
     s3_secret_key: str | None = None
     s3_bucket: str | None = None
     s3_region: str | None = None
     s3_presigned_url_expire_seconds: int = 3600
+
+    cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
 
     model_config = SettingsConfigDict(
         env_file=_ENV_FILE,
@@ -38,6 +41,10 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
+
+
+def cors_origin_list(value: str) -> list[str]:
+    return [item.strip() for item in value.split(",") if item.strip() and item.strip() != "*"]
 
 
 settings = get_settings()

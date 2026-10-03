@@ -118,6 +118,48 @@ def test_presigned_url_uses_get_object() -> None:
     asyncio.run(scenario())
 
 
+def test_presigned_url_uses_public_endpoint_and_upload_uses_internal() -> None:
+    async def scenario() -> None:
+        client = AsyncMock()
+        client.generate_presigned_url.return_value = "http://localhost:9000/shift-tracker/photo"
+        storage = S3Storage(
+            endpoint_url="http://minio:9000",
+            public_endpoint_url="http://localhost:9000",
+            access_key="access-key",
+            secret_key="secret-key",
+            bucket="shift-tracker",
+            region="us-east-1",
+        )
+        context = MagicMock()
+        context.__aenter__ = AsyncMock(return_value=client)
+        context.__aexit__ = AsyncMock(return_value=None)
+        storage.session = MagicMock()
+        storage.session.client = MagicMock(return_value=context)
+
+        await storage.upload(key="telegram/photo.jpg", data=b"photo", content_type="image/jpeg")
+        await storage.get_presigned_url(key="telegram/photo.jpg")
+
+        endpoints = [call.kwargs["endpoint_url"] for call in storage.session.client.call_args_list]
+        assert endpoints == ["http://minio:9000", "http://localhost:9000"]
+
+    asyncio.run(scenario())
+
+
+def test_presigned_url_falls_back_to_internal_endpoint() -> None:
+    async def scenario() -> None:
+        client = AsyncMock()
+        client.generate_presigned_url.return_value = "http://minio:9000/shift-tracker/photo"
+        storage, _context = _storage(client)
+
+        await storage.upload(key="telegram/photo.jpg", data=b"photo", content_type="image/jpeg")
+        await storage.get_presigned_url(key="telegram/photo.jpg")
+
+        endpoints = [call.kwargs["endpoint_url"] for call in storage.session.client.call_args_list]
+        assert endpoints == ["http://localhost:9000", "http://localhost:9000"]
+
+    asyncio.run(scenario())
+
+
 @pytest.mark.parametrize("expires_seconds", [0, -1])
 def test_invalid_expiration_is_rejected(expires_seconds: int) -> None:
     async def scenario() -> None:

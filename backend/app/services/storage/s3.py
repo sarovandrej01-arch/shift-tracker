@@ -27,8 +27,11 @@ class S3Storage(ObjectStorage):
         bucket: str | None,
         region: str | None = None,
         presigned_url_expire_seconds: int = 3600,
+        public_endpoint_url: str | None = None,
     ) -> None:
         self.endpoint_url = _require_setting(endpoint_url, "S3_ENDPOINT_URL")
+        public_endpoint = public_endpoint_url.strip() if public_endpoint_url and public_endpoint_url.strip() else ""
+        self.public_endpoint_url = public_endpoint or self.endpoint_url
         self.bucket = _require_setting(bucket, "S3_BUCKET")
         access_key = _require_setting(access_key, "S3_ACCESS_KEY")
         secret_key = _require_setting(secret_key, "S3_SECRET_KEY")
@@ -41,8 +44,8 @@ class S3Storage(ObjectStorage):
             region_name=region.strip() if region and region.strip() else None,
         )
 
-    def _client(self):
-        return self.session.client("s3", endpoint_url=self.endpoint_url)
+    def _client(self, *, endpoint_url: str | None = None):
+        return self.session.client("s3", endpoint_url=endpoint_url or self.endpoint_url)
 
     async def upload(
         self,
@@ -81,7 +84,7 @@ class S3Storage(ObjectStorage):
         if expires <= 0:
             raise ValueError("expires_seconds must be greater than 0")
         normalized_key = _normalize_key(key)
-        async with self._client() as client:
+        async with self._client(endpoint_url=self.public_endpoint_url) as client:
             return await client.generate_presigned_url(
                 "get_object",
                 Params={"Bucket": self.bucket, "Key": normalized_key},

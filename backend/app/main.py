@@ -29,6 +29,7 @@ from app.api.exception_handlers import (
     work_object_not_found_handler,
 )
 from app.api.router import api_router
+from app.core.config import cors_origin_list, settings
 from app.core.exceptions import (
     CannotModifyOwnAdminAccessError,
     EmployeeNotFoundError,
@@ -60,10 +61,7 @@ from app.core.exceptions import (
 app = FastAPI(title="shift-tracker")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=cors_origin_list(settings.cors_origins),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

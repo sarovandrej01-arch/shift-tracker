@@ -156,6 +156,7 @@ def get_object_storage() -> ObjectStorage:
         bucket=current.s3_bucket,
         region=current.s3_region,
         presigned_url_expire_seconds=current.s3_presigned_url_expire_seconds,
+        public_endpoint_url=current.s3_public_endpoint_url,
     )
 
 

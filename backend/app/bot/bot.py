@@ -18,4 +18,5 @@ def create_storage() -> S3Storage:
         bucket=settings.s3_bucket,
         region=settings.s3_region,
         presigned_url_expire_seconds=settings.s3_presigned_url_expire_seconds,
+        public_endpoint_url=settings.s3_public_endpoint_url,
     )
