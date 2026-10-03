@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     bot_token: str | None = None
     webhook_url: str | None = None
     webhook_secret: str | None = None
+    telegram_proxy_url: str | None = None
 
     jwt_secret_key: str
     jwt_algorithm: str = "HS256"

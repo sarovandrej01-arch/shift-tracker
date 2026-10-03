@@ -16,13 +16,13 @@ Telegram → backend → PostgreSQL и MinIO → frontend.
 
 ## Local development
 
-Поднять только базу и хранилище:
+Поднять только базу и хранилище. Файл `docker-compose.dev.yml` публикует PostgreSQL на хост, чтобы backend вне Docker мог подключиться к `localhost:5433`:
 
 ```bash
-docker compose up -d postgres minio minio-init
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d postgres minio minio-init
 ```
 
-PostgreSQL снаружи доступен на `localhost:5433`. MinIO API — `localhost:9000`, консоль — `localhost:9001`.
+PostgreSQL снаружи доступен на `localhost:5433` только с этим dev-файлом. MinIO API — `localhost:9000`, консоль — `localhost:9001`.
 
 Backend на хосте:
 
@@ -95,7 +95,31 @@ npm run lint
 
 ## Telegram configuration
 
-В `.env` задайте `BOT_TOKEN`. Группу, из которой бот читает сообщения, нужно зарегистрировать в интерфейсе как Telegram Group и привязать к объекту. Webhook для локального запуска не обязателен: бот в профиле `bot` работает через polling.
+В `.env` задайте `BOT_TOKEN`. Группу, из которой бот читает сообщения, нужно зарегистрировать в интерфейсе как Telegram Group и привязать к объекту. Webhook для локального запуска не обязателен: бот в профиле `bot` работает через polling. `WEBHOOK_URL` сам по себе режим не переключает.
+
+Проверка прямого доступа к Telegram с сервера, без токена:
+
+```bash
+curl -v --connect-timeout 10 https://api.telegram.org
+```
+
+### Telegram proxy
+
+Если VPS не открывает `api.telegram.org`, укажите прокси в `.env`. Поддерживаются схемы `http`, `socks4` и `socks5`. `socks5` ходит с удалённым DNS. Схемы `https` и `socks5h` клиент aiogram не принимает. Пустое значение оставляет прямое подключение.
+
+```env
+TELEGRAM_PROXY_URL=socks5://user:password@host:1080
+```
+
+После изменения:
+
+```bash
+docker compose --profile bot up -d --force-recreate bot
+```
+
+Реальные логин и пароль прокси не коммитятся и не пишутся в лог. В логе бота будет только `Telegram proxy configured`. Прокси вешается на HTTP-клиент бота и не зависит от того, polling это или будущий webhook. На webhook проект сам не переключается.
+
+PostgreSQL в базовом Compose не публикуется наружу. Backend, миграции и бот ходят на `postgres:5432` внутри сети Docker. На production порт `5433` не открывается. Для локального backend на хосте используйте `docker-compose.dev.yml`.
 
 ## Environment variables
 

@@ -1,0 +1,6 @@
+# Publishes PostgreSQL on the host for a backend running outside Docker.
+# Do not use this file on production.
+services:
+  postgres:
+    ports:
+      - "5433:5432"
