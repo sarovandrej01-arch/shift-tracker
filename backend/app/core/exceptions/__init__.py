@@ -11,6 +11,7 @@ from app.core.exceptions.employee import (
 )
 from app.core.exceptions.processing_log import ProcessingLogNotFoundError
 from app.core.exceptions.shift import ShiftAlreadyExistsError, ShiftNotFoundError
+from app.core.exceptions.storage import StorageConfigurationError, StorageError
 from app.core.exceptions.telegram_message import (
     TelegramMessageAlreadyExistsError,
     TelegramMessageNotFoundError,
@@ -35,6 +36,8 @@ __all__ = [
     "ProcessingLogNotFoundError",
     "ShiftAlreadyExistsError",
     "ShiftNotFoundError",
+    "StorageConfigurationError",
+    "StorageError",
     "TelegramGroupChatAlreadyExistsError",
     "TelegramMessageAlreadyExistsError",
     "TelegramMessageNotFoundError",
