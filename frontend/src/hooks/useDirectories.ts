@@ -7,13 +7,13 @@ import { queryKeys } from "../lib/queryKeys.ts";
 export function useEmployees() {
   return useQuery({
     queryKey: queryKeys.employees,
-    queryFn: listEmployees,
+    queryFn: () => listEmployees(),
   });
 }
 
 export function useWorkObjects() {
   return useQuery({
     queryKey: queryKeys.workObjects,
-    queryFn: listWorkObjects,
+    queryFn: () => listWorkObjects(),
   });
 }

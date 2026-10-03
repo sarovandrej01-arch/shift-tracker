@@ -17,6 +17,15 @@ export function getApiErrorMessage(error: unknown): string {
     if (apiError.detail === "Shift already exists") {
       return "Смена на эту дату уже существует";
     }
+    if (apiError.detail === "Employee with this personnel number already exists") {
+      return "Сотрудник с таким табельным номером уже есть";
+    }
+    if (apiError.detail === "Employee with this Telegram user ID already exists") {
+      return "Сотрудник с таким Telegram ID уже есть";
+    }
+    if (apiError.detail === "Work object with this name already exists") {
+      return "Объект с таким названием уже есть";
+    }
     return "Сообщение уже было обработано";
   }
   if (apiError.status === 422) {

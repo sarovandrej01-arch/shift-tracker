@@ -101,3 +101,23 @@ export function formatTelegramUser(username: string | null, userId: number | nul
   }
   return "Неизвестный пользователь";
 }
+
+export function formatTime(value: string | null | undefined): string {
+  if (!value) {
+    return "—";
+  }
+  const match = /^(\d{2}):(\d{2})/.exec(value);
+  return match ? `${match[1]}:${match[2]}` : value;
+}
+
+export function toApiTime(value: string): string {
+  if (/^\d{2}:\d{2}$/.test(value)) {
+    return `${value}:00`;
+  }
+  return value;
+}
+
+export function toTimeInput(value: string): string {
+  const match = /^(\d{2}):(\d{2})/.exec(value);
+  return match ? `${match[1]}:${match[2]}` : "";
+}

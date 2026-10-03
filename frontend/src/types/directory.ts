@@ -10,6 +10,21 @@ export type Employee = {
   updated_at: string;
 };
 
+export type EmployeeWrite = {
+  full_name: string;
+  personnel_number: string;
+  telegram_user_id: number | null;
+  telegram_username: string | null;
+  callsign: string | null;
+  is_active?: boolean;
+};
+
+export type EmployeeFilters = {
+  isActive: "" | "true" | "false";
+  search: string;
+  offset: number;
+};
+
 export type WorkObject = {
   id: number;
   name: string;
@@ -21,3 +36,19 @@ export type WorkObject = {
   created_at: string;
   updated_at: string;
 };
+
+export type WorkObjectWrite = {
+  name: string;
+  shift_start_time: string;
+  checkin_before_minutes: number;
+  checkin_after_minutes: number;
+  timezone: string;
+  is_active?: boolean;
+};
+
+export type WorkObjectFilters = {
+  isActive: "" | "true" | "false";
+  search: string;
+  offset: number;
+};
+
