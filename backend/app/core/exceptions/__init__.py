@@ -9,6 +9,7 @@ from app.core.exceptions.employee import (
     EmployeePersonnelNumberAlreadyExistsError,
     EmployeeTelegramUserAlreadyExistsError,
 )
+from app.core.exceptions.processing_log import ProcessingLogNotFoundError
 from app.core.exceptions.shift import ShiftAlreadyExistsError, ShiftNotFoundError
 from app.core.exceptions.telegram_message import (
     TelegramMessageAlreadyExistsError,
@@ -31,6 +32,7 @@ __all__ = [
     "InvalidTokenError",
     "InvalidUserPasswordError",
     "PermissionDeniedError",
+    "ProcessingLogNotFoundError",
     "ShiftAlreadyExistsError",
     "ShiftNotFoundError",
     "TelegramGroupChatAlreadyExistsError",

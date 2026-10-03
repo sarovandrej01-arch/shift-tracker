@@ -7,12 +7,14 @@ from app.core.exceptions.auth import InactiveUserError, InvalidTokenError, Permi
 from app.db.session import get_db_session
 from app.models.user import User
 from app.repositories.employee import EmployeeRepository
+from app.repositories.processing_log import ProcessingLogRepository
 from app.repositories.shift import ShiftRepository
 from app.repositories.telegram_group import TelegramGroupRepository
 from app.repositories.telegram_message import TelegramMessageRepository
 from app.repositories.user import UserRepository
 from app.repositories.work_object import WorkObjectRepository
 from app.services.auth.jwt import decode_access_token
+from app.services.processing_log import ProcessingLogService
 from app.services.shift import ShiftService
 from app.services.auth.service import AuthService
 from app.services.employee import EmployeeService
@@ -105,6 +107,19 @@ def get_shift_service(
     repository: ShiftRepository = Depends(get_shift_repository),
 ) -> ShiftService:
     return ShiftService(repository=repository, session=session)
+
+
+def get_processing_log_repository(
+    session: AsyncSession = Depends(get_db_session),
+) -> ProcessingLogRepository:
+    return ProcessingLogRepository(session)
+
+
+def get_processing_log_service(
+    session: AsyncSession = Depends(get_db_session),
+    repository: ProcessingLogRepository = Depends(get_processing_log_repository),
+) -> ProcessingLogService:
+    return ProcessingLogService(repository=repository, session=session)
 
 
 def get_auth_service(

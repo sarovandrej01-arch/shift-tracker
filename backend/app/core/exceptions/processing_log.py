@@ -1,0 +1,2 @@
+class ProcessingLogNotFoundError(Exception):
+    pass
