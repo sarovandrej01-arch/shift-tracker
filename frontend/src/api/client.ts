@@ -21,13 +21,40 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+function readBearerToken(error: unknown): string | null {
+  if (!axios.isAxiosError(error)) {
+    return null;
+  }
+
+  const headers = error.config?.headers;
+  if (!headers) {
+    return null;
+  }
+
+  const value =
+    typeof headers.get === "function"
+      ? headers.get("Authorization")
+      : headers.Authorization;
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const prefix = "Bearer ";
+  return value.startsWith(prefix) ? value.slice(prefix.length) : null;
+}
+
 apiClient.interceptors.response.use(
   (response) => response,
   (error: unknown) => {
     const apiError = normalizeApiError(error);
     if (apiError.status === 401) {
-      clearAccessToken();
-      notifyUnauthorized();
+      const requestToken = readBearerToken(error);
+      const storedToken = getAccessToken();
+      const tokenStillCurrent = requestToken === null || requestToken === storedToken;
+      if (tokenStillCurrent) {
+        clearAccessToken();
+        notifyUnauthorized();
+      }
     }
     return Promise.reject(apiError);
   },

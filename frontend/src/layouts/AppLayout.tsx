@@ -1,6 +1,6 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet } from "react-router-dom";
 
-import { canAccessAdmin } from "../auth/roles.ts";
+import { canAccessAdmin, formatUserRole } from "../auth/roles.ts";
 import { useAuth } from "../hooks/useAuth.ts";
 
 type NavItem = {
@@ -22,13 +22,7 @@ const NAV_ITEMS: NavItem[] = [
 
 export function AppLayout() {
   const { user, logout } = useAuth();
-  const navigate = useNavigate();
   const items = NAV_ITEMS.filter((item) => !item.adminOnly || canAccessAdmin(user));
-
-  function handleLogout() {
-    logout();
-    void navigate("/login", { replace: true });
-  }
 
   return (
     <div className="flex min-h-screen bg-slate-100 text-slate-900">
@@ -54,16 +48,20 @@ export function AppLayout() {
         </nav>
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-14 items-center justify-between border-b border-slate-200 bg-white px-6">
+        <header className="flex min-h-16 items-center justify-between gap-4 border-b border-slate-200 bg-white px-6 py-3">
           <span className="font-semibold">Shift Tracker</span>
-          <div className="flex items-center gap-4">
-            <span className="max-w-xs truncate text-sm text-slate-600">
-              {user?.full_name ?? "Пользователь"}
-            </span>
+          <div className="flex min-w-0 items-center gap-4">
+            {user ? (
+              <div className="min-w-0 text-right">
+                <p className="truncate text-sm font-medium">{user.full_name}</p>
+                <p className="truncate text-xs text-slate-500">{user.email}</p>
+                <p className="text-xs text-slate-500">{formatUserRole(user.role)}</p>
+              </div>
+            ) : null}
             <button
               type="button"
               className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700"
-              onClick={handleLogout}
+              onClick={logout}
             >
               Выйти
             </button>

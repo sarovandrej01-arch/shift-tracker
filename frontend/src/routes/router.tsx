@@ -13,6 +13,7 @@ import { ShiftsPage } from "../pages/ShiftsPage.tsx";
 import { TelegramGroupsPage } from "../pages/TelegramGroupsPage.tsx";
 import { UsersPage } from "../pages/UsersPage.tsx";
 import { WorkObjectsPage } from "../pages/WorkObjectsPage.tsx";
+import { AdminRoute } from "./AdminRoute.tsx";
 import { ProtectedRoute } from "./ProtectedRoute.tsx";
 import { RootRedirect } from "./RootRedirect.tsx";
 
@@ -36,7 +37,10 @@ export const router = createBrowserRouter([
               { path: "employees", element: <EmployeesPage /> },
               { path: "work-objects", element: <WorkObjectsPage /> },
               { path: "telegram-groups", element: <TelegramGroupsPage /> },
-              { path: "users", element: <UsersPage /> },
+              {
+                element: <AdminRoute />,
+                children: [{ path: "users", element: <UsersPage /> }],
+              },
             ],
           },
         ],
