@@ -1,7 +1,10 @@
+from functools import lru_cache
+
 from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import get_settings
 from app.core.enums import UserRole
 from app.core.exceptions.auth import InactiveUserError, InvalidTokenError, PermissionDeniedError
 from app.db.session import get_db_session
@@ -14,10 +17,13 @@ from app.repositories.telegram_message import TelegramMessageRepository
 from app.repositories.user import UserRepository
 from app.repositories.work_object import WorkObjectRepository
 from app.services.auth.jwt import decode_access_token
+from app.services.message import MessageService
 from app.services.processing_log import ProcessingLogService
+from app.services.review import ReviewService
 from app.services.shift import ShiftService
 from app.services.auth.service import AuthService
 from app.services.employee import EmployeeService
+from app.services.storage import ObjectStorage, S3Storage
 from app.services.telegram_group import TelegramGroupService
 from app.services.telegram_message import TelegramMessageService
 from app.services.user import UserService
@@ -120,6 +126,54 @@ def get_processing_log_service(
     repository: ProcessingLogRepository = Depends(get_processing_log_repository),
 ) -> ProcessingLogService:
     return ProcessingLogService(repository=repository, session=session)
+
+
+@lru_cache
+def get_object_storage() -> ObjectStorage:
+    current = get_settings()
+    return S3Storage(
+        endpoint_url=current.s3_endpoint_url,
+        access_key=current.s3_access_key,
+        secret_key=current.s3_secret_key,
+        bucket=current.s3_bucket,
+        region=current.s3_region,
+        presigned_url_expire_seconds=current.s3_presigned_url_expire_seconds,
+    )
+
+
+def get_review_service(
+    session: AsyncSession = Depends(get_db_session),
+    message_repository: TelegramMessageRepository = Depends(get_telegram_message_repository),
+    employee_repository: EmployeeRepository = Depends(get_employee_repository),
+    work_object_repository: WorkObjectRepository = Depends(get_work_object_repository),
+    shift_repository: ShiftRepository = Depends(get_shift_repository),
+    processing_log_repository: ProcessingLogRepository = Depends(get_processing_log_repository),
+) -> ReviewService:
+    return ReviewService(
+        session=session,
+        message_repository=message_repository,
+        employee_repository=employee_repository,
+        work_object_repository=work_object_repository,
+        shift_repository=shift_repository,
+        processing_log_repository=processing_log_repository,
+    )
+
+
+def get_message_service(
+    message_repository: TelegramMessageRepository = Depends(get_telegram_message_repository),
+    employee_repository: EmployeeRepository = Depends(get_employee_repository),
+    work_object_repository: WorkObjectRepository = Depends(get_work_object_repository),
+    shift_repository: ShiftRepository = Depends(get_shift_repository),
+    storage: ObjectStorage = Depends(get_object_storage),
+) -> MessageService:
+    return MessageService(
+        message_repository=message_repository,
+        employee_repository=employee_repository,
+        work_object_repository=work_object_repository,
+        shift_repository=shift_repository,
+        storage=storage,
+        presigned_url_expire_seconds=get_settings().s3_presigned_url_expire_seconds,
+    )
 
 
 def get_auth_service(

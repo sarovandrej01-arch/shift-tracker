@@ -4,3 +4,11 @@ class TelegramMessageNotFoundError(Exception):
 
 class TelegramMessageAlreadyExistsError(Exception):
     pass
+
+
+class TelegramMessageNotInReviewError(Exception):
+    pass
+
+
+class TelegramMessagePhotoNotFoundError(Exception):
+    pass

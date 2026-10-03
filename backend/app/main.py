@@ -8,9 +8,15 @@ from app.api.exception_handlers import (
     invalid_credentials_handler,
     invalid_token_handler,
     permission_denied_handler,
+    review_confirmation_incomplete_handler,
+    shift_already_exists_handler,
+    storage_error_handler,
     telegram_group_chat_already_exists_handler,
     telegram_group_not_found_handler,
     telegram_group_work_object_not_found_handler,
+    telegram_message_not_found_handler,
+    telegram_message_not_in_review_handler,
+    telegram_message_photo_not_found_handler,
     user_already_exists_handler,
     user_not_found_handler,
     work_object_already_exists_handler,
@@ -25,9 +31,15 @@ from app.core.exceptions import (
     InvalidCredentialsError,
     InvalidTokenError,
     PermissionDeniedError,
+    ReviewConfirmationIncompleteError,
+    ShiftAlreadyExistsError,
+    StorageError,
     TelegramGroupChatAlreadyExistsError,
     TelegramGroupNotFoundError,
     TelegramGroupWorkObjectNotFoundError,
+    TelegramMessageNotFoundError,
+    TelegramMessageNotInReviewError,
+    TelegramMessagePhotoNotFoundError,
     UserAlreadyExistsError,
     UserNotFoundError,
     WorkObjectAlreadyExistsError,
@@ -62,3 +74,9 @@ app.add_exception_handler(
     TelegramGroupWorkObjectNotFoundError,
     telegram_group_work_object_not_found_handler,
 )
+app.add_exception_handler(TelegramMessageNotFoundError, telegram_message_not_found_handler)
+app.add_exception_handler(TelegramMessagePhotoNotFoundError, telegram_message_photo_not_found_handler)
+app.add_exception_handler(TelegramMessageNotInReviewError, telegram_message_not_in_review_handler)
+app.add_exception_handler(ReviewConfirmationIncompleteError, review_confirmation_incomplete_handler)
+app.add_exception_handler(ShiftAlreadyExistsError, shift_already_exists_handler)
+app.add_exception_handler(StorageError, storage_error_handler)

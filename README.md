@@ -8,7 +8,7 @@ docker compose ps
 docker compose down
 ```
 
-PostgreSQL: `localhost:5432`  
+PostgreSQL: `localhost:5433`  
 MinIO S3 API: `localhost:9000`  
 MinIO Console: `localhost:9001`
 

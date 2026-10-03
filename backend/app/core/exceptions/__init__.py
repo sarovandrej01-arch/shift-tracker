@@ -10,11 +10,14 @@ from app.core.exceptions.employee import (
     EmployeeTelegramUserAlreadyExistsError,
 )
 from app.core.exceptions.processing_log import ProcessingLogNotFoundError
+from app.core.exceptions.review import ReviewConfirmationIncompleteError
 from app.core.exceptions.shift import ShiftAlreadyExistsError, ShiftNotFoundError
 from app.core.exceptions.storage import StorageConfigurationError, StorageError
 from app.core.exceptions.telegram_message import (
     TelegramMessageAlreadyExistsError,
     TelegramMessageNotFoundError,
+    TelegramMessageNotInReviewError,
+    TelegramMessagePhotoNotFoundError,
 )
 from app.core.exceptions.telegram_group import (
     TelegramGroupChatAlreadyExistsError,
@@ -34,6 +37,7 @@ __all__ = [
     "InvalidUserPasswordError",
     "PermissionDeniedError",
     "ProcessingLogNotFoundError",
+    "ReviewConfirmationIncompleteError",
     "ShiftAlreadyExistsError",
     "ShiftNotFoundError",
     "StorageConfigurationError",
@@ -41,6 +45,8 @@ __all__ = [
     "TelegramGroupChatAlreadyExistsError",
     "TelegramMessageAlreadyExistsError",
     "TelegramMessageNotFoundError",
+    "TelegramMessageNotInReviewError",
+    "TelegramMessagePhotoNotFoundError",
     "TelegramGroupNotFoundError",
     "TelegramGroupWorkObjectNotFoundError",
     "UserAlreadyExistsError",

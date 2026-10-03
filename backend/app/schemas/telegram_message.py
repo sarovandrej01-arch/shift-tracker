@@ -3,6 +3,9 @@ from datetime import date, datetime
 from pydantic import BaseModel, ConfigDict, field_validator
 
 from app.core.enums import MessageReason, MessageStatus
+from app.schemas.employee import EmployeeRead
+from app.schemas.shift import ShiftRead
+from app.schemas.work_object import WorkObjectRead
 
 
 def _blank_to_none(value: str | None) -> str | None:
@@ -57,3 +60,15 @@ class TelegramMessageRead(BaseModel):
     reason: MessageReason | None
     created_at: datetime
     updated_at: datetime
+
+
+class MessageDetailRead(TelegramMessageRead):
+    employee: EmployeeRead | None = None
+    work_object: WorkObjectRead | None = None
+    shift: ShiftRead | None = None
+
+
+class MessagePhotoUrlRead(BaseModel):
+    message_id: int
+    url: str
+    expires_in: int

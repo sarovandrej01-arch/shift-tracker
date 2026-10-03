@@ -9,9 +9,15 @@ from app.core.exceptions import (
     InvalidCredentialsError,
     InvalidTokenError,
     PermissionDeniedError,
+    ReviewConfirmationIncompleteError,
+    ShiftAlreadyExistsError,
+    StorageError,
     TelegramGroupChatAlreadyExistsError,
     TelegramGroupNotFoundError,
     TelegramGroupWorkObjectNotFoundError,
+    TelegramMessageNotFoundError,
+    TelegramMessageNotInReviewError,
+    TelegramMessagePhotoNotFoundError,
     UserAlreadyExistsError,
     UserNotFoundError,
     WorkObjectAlreadyExistsError,
@@ -131,3 +137,49 @@ async def work_object_already_exists_handler(
         status_code=409,
         content={"detail": "Work object with this name already exists"},
     )
+
+
+async def telegram_message_not_found_handler(
+    _request: Request,
+    _exc: TelegramMessageNotFoundError,
+) -> JSONResponse:
+    return JSONResponse(status_code=404, content={"detail": "Telegram message not found"})
+
+
+async def telegram_message_photo_not_found_handler(
+    _request: Request,
+    _exc: TelegramMessagePhotoNotFoundError,
+) -> JSONResponse:
+    return JSONResponse(status_code=404, content={"detail": "Telegram message photo not found"})
+
+
+async def telegram_message_not_in_review_handler(
+    _request: Request,
+    _exc: TelegramMessageNotInReviewError,
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=409,
+        content={"detail": "Telegram message is not in review"},
+    )
+
+
+async def review_confirmation_incomplete_handler(
+    _request: Request,
+    exc: ReviewConfirmationIncompleteError,
+) -> JSONResponse:
+    missing = ", ".join(exc.missing_fields)
+    return JSONResponse(
+        status_code=422,
+        content={"detail": f"Missing confirmation data: {missing}"},
+    )
+
+
+async def shift_already_exists_handler(
+    _request: Request,
+    _exc: ShiftAlreadyExistsError,
+) -> JSONResponse:
+    return JSONResponse(status_code=409, content={"detail": "Shift already exists"})
+
+
+async def storage_error_handler(_request: Request, _exc: StorageError) -> JSONResponse:
+    return JSONResponse(status_code=502, content={"detail": "Photo storage is unavailable"})

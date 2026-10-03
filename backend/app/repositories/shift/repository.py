@@ -14,6 +14,15 @@ class ShiftRepository:
         stmt = select(Shift).where(Shift.id == shift_id)
         return await self.session.scalar(stmt)
 
+    async def get_by_source_message_id(self, message_id: int) -> Shift | None:
+        stmt = (
+            select(Shift)
+            .where(Shift.source_message_id == message_id)
+            .order_by(Shift.id.desc())
+            .limit(1)
+        )
+        return await self.session.scalar(stmt)
+
     async def get_existing_shift(
         self,
         employee_id: int,

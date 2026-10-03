@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, time, timedelta, timezone
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,6 +11,14 @@ def _blank_to_none(value: str | None) -> str | None:
         return None
     normalized = value.strip()
     return normalized or None
+
+
+def _created_at_lower(value: date) -> datetime:
+    return datetime.combine(value, time.min, tzinfo=timezone.utc)
+
+
+def _created_at_upper(value: date) -> datetime:
+    return datetime.combine(value + timedelta(days=1), time.min, tzinfo=timezone.utc)
 
 
 _UPDATABLE_FIELDS = frozenset(
@@ -63,6 +71,12 @@ class TelegramMessageRepository:
         reason: MessageReason | None = None,
         employee_id: int | None = None,
         object_id: int | None = None,
+        telegram_chat_id: int | None = None,
+        telegram_user_id: int | None = None,
+        date_from: date | None = None,
+        date_to: date | None = None,
+        shift_date_from: date | None = None,
+        shift_date_to: date | None = None,
     ) -> list[TelegramMessage]:
         stmt = select(TelegramMessage)
         if status is not None:
@@ -73,7 +87,19 @@ class TelegramMessageRepository:
             stmt = stmt.where(TelegramMessage.employee_id == employee_id)
         if object_id is not None:
             stmt = stmt.where(TelegramMessage.object_id == object_id)
-        stmt = stmt.order_by(TelegramMessage.id.desc()).offset(offset).limit(limit)
+        if telegram_chat_id is not None:
+            stmt = stmt.where(TelegramMessage.telegram_chat_id == telegram_chat_id)
+        if telegram_user_id is not None:
+            stmt = stmt.where(TelegramMessage.telegram_user_id == telegram_user_id)
+        if date_from is not None:
+            stmt = stmt.where(TelegramMessage.created_at >= _created_at_lower(date_from))
+        if date_to is not None:
+            stmt = stmt.where(TelegramMessage.created_at < _created_at_upper(date_to))
+        if shift_date_from is not None:
+            stmt = stmt.where(TelegramMessage.shift_date >= shift_date_from)
+        if shift_date_to is not None:
+            stmt = stmt.where(TelegramMessage.shift_date <= shift_date_to)
+        stmt = stmt.order_by(TelegramMessage.created_at.desc(), TelegramMessage.id.desc()).offset(offset).limit(limit)
         result = await self.session.scalars(stmt)
         return list(result.all())
 
