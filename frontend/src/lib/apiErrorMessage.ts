@@ -26,6 +26,18 @@ export function getApiErrorMessage(error: unknown): string {
     if (apiError.detail === "Work object with this name already exists") {
       return "Объект с таким названием уже есть";
     }
+    if (apiError.detail === "User with this email already exists") {
+      return "Пользователь с таким email уже есть";
+    }
+    if (apiError.detail === "You cannot remove your own administrator access") {
+      return "Нельзя снять с себя права администратора";
+    }
+    if (apiError.detail === "Cannot remove the last active administrator") {
+      return "Нельзя убрать последнего активного администратора";
+    }
+    if (apiError.detail === "Telegram group with this chat ID already exists") {
+      return "Группа с таким Telegram chat ID уже существует";
+    }
     return "Сообщение уже было обработано";
   }
   if (apiError.status === 422) {
